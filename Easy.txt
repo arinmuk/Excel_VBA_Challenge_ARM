@@ -1,0 +1,50 @@
+Sub Easy_Assignment()
+Dim wbk As Workbook
+Dim CC()
+Dim row As Long
+Dim col As Long
+Dim sum As Double
+Dim brandname As String
+Dim i As Long
+currpath = ActiveWorkbook.Path
+Set wbk = Workbooks.Open(currpath & "\Multiple_year_stock_data.xlsx")
+wbk.Worksheets(1).Activate
+For Each ws In wbk.Worksheets
+
+worksheetname = ws.Name
+'MsgBox worksheetname
+lastrow = ws.Cells(Rows.Count, 1).End(xlUp).row
+lastcol = ws.Cells(1, Columns.Count).End(xlToLeft).Column
+Erase CC
+ReDim CC(lastrow, 2)
+
+
+i = 1
+For row = 2 To lastrow
+
+If ws.Cells(row, 1) <> ws.Cells(row + 1, 1) Then
+CC(i, 1) = ws.Cells(row, 1)
+CC(i, 2) = sum + ws.Cells(row, 7)
+sum = 0
+i = i + 1
+Else
+
+sum = sum + ws.Cells(row, 7)
+
+End If
+Next row
+ws.Cells(1, lastcol + 2).Value = "Ticker"
+ws.Cells(1, lastcol + 3).Value = "Total stock volume"
+For Summary = 2 To i
+ws.Cells(Summary, lastcol + 2).Value = CC(Summary - 1, 1)
+ws.Cells(Summary, lastcol + 3).Value = CC(Summary - 1, 2)
+Next Summary
+ws.Columns("A:K").AutoFit
+
+
+
+
+Next ws
+
+End Sub
+

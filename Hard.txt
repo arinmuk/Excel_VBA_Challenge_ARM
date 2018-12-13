@@ -1,0 +1,133 @@
+Sub Hard_Assignment()
+Dim wbk As Workbook
+Dim CC()
+Dim row As Long
+Dim col As Long
+Dim sum As Double
+Dim brandname As String
+Dim i As Long
+Dim Initial As Double
+Dim final As Double
+Dim Firstsort()
+Dim secondSort()
+
+currpath = ActiveWorkbook.Path
+Set wbk = Workbooks.Open(currpath & "\Multiple_year_stock_data.xlsx")
+wbk.Worksheets(1).Activate
+For Each ws In wbk.Worksheets
+
+worksheetname = ws.Name
+'MsgBox worksheetname
+lastrow = ws.Cells(Rows.Count, 1).End(xlUp).row
+lastcol = ws.Cells(1, Columns.Count).End(xlToLeft).Column
+Erase CC
+ReDim CC(lastrow, 4)
+
+
+i = 1
+row = 2
+Initial = ws.Cells(row, 3)
+For row = 2 To lastrow
+If ws.Cells(row, 3) <> 0 Then
+        If ws.Cells(row, 1) <> ws.Cells(row + 1, 1) Then
+        final = ws.Cells(row, 3)
+        CC(i, 1) = ws.Cells(row, 1)
+        CC(i, 2) = Initial
+        CC(i, 3) = final - Initial
+        CC(i, 4) = sum + ws.Cells(row, 7)
+        
+        
+        Initial = ws.Cells(row + 1, 3)
+        sum = 0
+        i = i + 1
+        Else
+        
+        sum = sum + ws.Cells(row, 7)
+        
+        End If
+     Else
+     Initial = ws.Cells(row + 1, 3)
+End If
+Next row
+ws.Cells(1, lastcol + 2).Value = "Ticker"
+ws.Cells(1, lastcol + 3).Value = "Yearly change"
+ws.Cells(1, lastcol + 4).Value = "Percentage Change"
+ws.Cells(1, lastcol + 5).Value = "Total stock volume"
+ws.Cells(1, lastcol + 9).Value = "Ticker"
+ws.Cells(1, lastcol + 10).Value = "Value"
+ws.Cells(2, lastcol + 8).Value = "Greatest % Increase"
+ws.Cells(3, lastcol + 8).Value = "Greatest % Decrease"
+ws.Cells(4, lastcol + 8).Value = "Greatest Total Volume"
+For Summary = 2 To i
+ws.Cells(Summary, lastcol + 2).Value = CC(Summary - 1, 1)
+ws.Cells(Summary, lastcol + 3).Value = CC(Summary - 1, 3)
+If CC(Summary - 1, 3) < 0 Then
+ws.Cells(Summary, lastcol + 3).Interior.Color = vbRed
+Else
+ws.Cells(Summary, lastcol + 3).Interior.Color = vbGreen
+End If
+ValuePercent = CC(Summary - 1, 3) / CC(Summary - 1, 2)
+ws.Cells(Summary, lastcol + 4).Value = Format(ValuePercent, "0.00%")
+
+ws.Cells(Summary, lastcol + 5).Value = CC(Summary - 1, 4)
+Next Summary
+
+
+''====== sort array
+lastrow1 = ws.Cells(Rows.Count, lastcol + 2).End(xlUp).row - 1
+ReDim Firstsort(lastrow1, 2)
+ReDim secondSort(lastrow1, 2)
+
+For rowctr = 1 To lastrow1
+Firstsort(rowctr, 1) = ws.Cells(rowctr + 1, lastcol + 2).Value
+Firstsort(rowctr, 2) = ws.Cells(rowctr + 1, lastcol + 4).Value
+secondSort(rowctr, 1) = ws.Cells(rowctr + 1, lastcol + 2).Value
+secondSort(rowctr, 2) = ws.Cells(rowctr + 1, lastcol + 5).Value
+Next rowctr
+''====sort the first array
+
+For i = 1 To lastrow1
+
+For J = 1 To lastrow1 - i
+
+ If Firstsort(J, 2) > Firstsort(J + 1, 2) Then
+ temp1 = Firstsort(J + 1, 1)
+ TEMP2 = Firstsort(J + 1, 2)
+ Firstsort(J + 1, 1) = Firstsort(J, 1)
+ Firstsort(J + 1, 2) = Firstsort(J, 2)
+ Firstsort(J, 1) = temp1
+ Firstsort(J, 2) = TEMP2
+ End If
+ Next J
+ Next i
+ws.Cells(2, lastcol + 9).Value = Firstsort(lastrow1, 1)
+ws.Cells(2, lastcol + 10).Value = Format(Firstsort(lastrow1, 2), "0.00%")
+ws.Cells(3, lastcol + 9).Value = Firstsort(1, 1)
+ws.Cells(3, lastcol + 10).Value = Format(Firstsort(1, 2), "0.00%")
+
+''---sort the second array
+
+For i = 1 To lastrow1
+
+For J = 1 To lastrow1 - i
+
+ If secondSort(J, 2) > secondSort(J + 1, 2) Then
+ temp1 = secondSort(J + 1, 1)
+ TEMP2 = secondSort(J + 1, 2)
+ secondSort(J + 1, 1) = secondSort(J, 1)
+ secondSort(J + 1, 2) = secondSort(J, 2)
+ secondSort(J, 1) = temp1
+ secondSort(J, 2) = TEMP2
+ End If
+ Next J
+ Next i
+ws.Cells(4, lastcol + 9).Value = secondSort(lastrow1, 1)
+ws.Cells(4, lastcol + 10).Value = secondSort(lastrow1, 2)
+
+
+''''----------
+
+ws.Columns("A:W").AutoFit
+Next ws
+
+End Sub
